@@ -96,16 +96,16 @@ func (_c *MockBookingService_Book_Call) RunAndReturn(run func(ctx context.Contex
 }
 
 // CancelBook provides a mock function for the type MockBookingService
-func (_mock *MockBookingService) CancelBook(ctx context.Context, eventID int, userID int) error {
-	ret := _mock.Called(ctx, eventID, userID)
+func (_mock *MockBookingService) CancelBook(ctx context.Context, bookID int, eventID int, userID int) error {
+	ret := _mock.Called(ctx, bookID, eventID, userID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CancelBook")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) error); ok {
-		r0 = returnFunc(ctx, eventID, userID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int, int) error); ok {
+		r0 = returnFunc(ctx, bookID, eventID, userID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -119,13 +119,14 @@ type MockBookingService_CancelBook_Call struct {
 
 // CancelBook is a helper method to define mock.On call
 //   - ctx context.Context
+//   - bookID int
 //   - eventID int
 //   - userID int
-func (_e *MockBookingService_Expecter) CancelBook(ctx interface{}, eventID interface{}, userID interface{}) *MockBookingService_CancelBook_Call {
-	return &MockBookingService_CancelBook_Call{Call: _e.mock.On("CancelBook", ctx, eventID, userID)}
+func (_e *MockBookingService_Expecter) CancelBook(ctx interface{}, bookID interface{}, eventID interface{}, userID interface{}) *MockBookingService_CancelBook_Call {
+	return &MockBookingService_CancelBook_Call{Call: _e.mock.On("CancelBook", ctx, bookID, eventID, userID)}
 }
 
-func (_c *MockBookingService_CancelBook_Call) Run(run func(ctx context.Context, eventID int, userID int)) *MockBookingService_CancelBook_Call {
+func (_c *MockBookingService_CancelBook_Call) Run(run func(ctx context.Context, bookID int, eventID int, userID int)) *MockBookingService_CancelBook_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -139,10 +140,15 @@ func (_c *MockBookingService_CancelBook_Call) Run(run func(ctx context.Context, 
 		if args[2] != nil {
 			arg2 = args[2].(int)
 		}
+		var arg3 int
+		if args[3] != nil {
+			arg3 = args[3].(int)
+		}
 		run(
 			arg0,
 			arg1,
 			arg2,
+			arg3,
 		)
 	})
 	return _c
@@ -153,22 +159,22 @@ func (_c *MockBookingService_CancelBook_Call) Return(err error) *MockBookingServ
 	return _c
 }
 
-func (_c *MockBookingService_CancelBook_Call) RunAndReturn(run func(ctx context.Context, eventID int, userID int) error) *MockBookingService_CancelBook_Call {
+func (_c *MockBookingService_CancelBook_Call) RunAndReturn(run func(ctx context.Context, bookID int, eventID int, userID int) error) *MockBookingService_CancelBook_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Confirm provides a mock function for the type MockBookingService
-func (_mock *MockBookingService) Confirm(ctx context.Context, eventID int, userID int) error {
-	ret := _mock.Called(ctx, eventID, userID)
+func (_mock *MockBookingService) Confirm(ctx context.Context, bookID int, eventID int, userID int) error {
+	ret := _mock.Called(ctx, bookID, eventID, userID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Confirm")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) error); ok {
-		r0 = returnFunc(ctx, eventID, userID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int, int) error); ok {
+		r0 = returnFunc(ctx, bookID, eventID, userID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -182,13 +188,14 @@ type MockBookingService_Confirm_Call struct {
 
 // Confirm is a helper method to define mock.On call
 //   - ctx context.Context
+//   - bookID int
 //   - eventID int
 //   - userID int
-func (_e *MockBookingService_Expecter) Confirm(ctx interface{}, eventID interface{}, userID interface{}) *MockBookingService_Confirm_Call {
-	return &MockBookingService_Confirm_Call{Call: _e.mock.On("Confirm", ctx, eventID, userID)}
+func (_e *MockBookingService_Expecter) Confirm(ctx interface{}, bookID interface{}, eventID interface{}, userID interface{}) *MockBookingService_Confirm_Call {
+	return &MockBookingService_Confirm_Call{Call: _e.mock.On("Confirm", ctx, bookID, eventID, userID)}
 }
 
-func (_c *MockBookingService_Confirm_Call) Run(run func(ctx context.Context, eventID int, userID int)) *MockBookingService_Confirm_Call {
+func (_c *MockBookingService_Confirm_Call) Run(run func(ctx context.Context, bookID int, eventID int, userID int)) *MockBookingService_Confirm_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -202,10 +209,15 @@ func (_c *MockBookingService_Confirm_Call) Run(run func(ctx context.Context, eve
 		if args[2] != nil {
 			arg2 = args[2].(int)
 		}
+		var arg3 int
+		if args[3] != nil {
+			arg3 = args[3].(int)
+		}
 		run(
 			arg0,
 			arg1,
 			arg2,
+			arg3,
 		)
 	})
 	return _c
@@ -216,7 +228,7 @@ func (_c *MockBookingService_Confirm_Call) Return(err error) *MockBookingService
 	return _c
 }
 
-func (_c *MockBookingService_Confirm_Call) RunAndReturn(run func(ctx context.Context, eventID int, userID int) error) *MockBookingService_Confirm_Call {
+func (_c *MockBookingService_Confirm_Call) RunAndReturn(run func(ctx context.Context, bookID int, eventID int, userID int) error) *MockBookingService_Confirm_Call {
 	_c.Call.Return(run)
 	return _c
 }

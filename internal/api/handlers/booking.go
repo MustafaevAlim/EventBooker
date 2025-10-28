@@ -55,7 +55,14 @@ func (h *BookingHandler) Confirm(c *ginext.Context) {
 		return
 	}
 
-	err = h.bookingService.Confirm(context.Background(), eventID, userID)
+	bookIDStr := c.Param("book_id")
+	bookID, err := strconv.Atoi(bookIDStr)
+	if err != nil {
+		NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = h.bookingService.Confirm(context.Background(), bookID, eventID, userID)
 	if err != nil {
 		NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -126,7 +133,14 @@ func (h *BookingHandler) Cancel(c *ginext.Context) {
 		return
 	}
 
-	err = h.bookingService.CancelBook(context.Background(), eventID, userID)
+	bookIDStr := c.Param("book_id")
+	bookID, err := strconv.Atoi(bookIDStr)
+	if err != nil {
+		NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = h.bookingService.CancelBook(context.Background(), bookID, eventID, userID)
 	if err != nil {
 		NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

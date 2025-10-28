@@ -634,10 +634,10 @@
                         Статус: <span class="badge">${getStatusText(booking.status)}</span>
                     </div>
                     ${booking.status === 'pending' ? `
-                        <button onclick="confirmBooking(${booking.event_id})">Подтвердить бронь</button>
+                        <button onclick="confirmBooking(${booking.event_id}, ${booking.booking_id || booking.id})">Подтвердить бронь</button>
                     ` : ''}
                     ${booking.status !== 'cancelled'? `
-                        <button onclick="canceledBooking(${booking.event_id})">Отменить бронь</button>
+                        <button onclick="canceledBooking(${booking.event_id}, ${booking.booking_id || booking.id})">Отменить бронь</button>
                     ` : ''}
                 </div>
             `).join('');
@@ -678,9 +678,9 @@
             }
         }
 
-        async function confirmBooking(eventId) {
+        async function confirmBooking(eventId, bookId) {
             try {
-                await apiRequest(`/api/events/${eventId}/confirm`, { method: 'POST' });
+                await apiRequest(`/api/events/${eventId}/confirm/${bookId}`, { method: 'POST' });
 
                 loadInitialBookingsPage();
             } catch (error) {
@@ -688,9 +688,9 @@
             }
         }
 
-        async function canceledBooking(eventId) {
+        async function canceledBooking(eventId, bookId) {
             try {
-                await apiRequest(`/api/events/${eventId}/cancel`, { method: 'POST' });
+                await apiRequest(`/api/events/${eventId}/cancel/${bookId}`, { method: 'POST' });
                 loadInitialBookingsPage();
             } catch (error) {
                 alert('Ошибка: ' + error.message);

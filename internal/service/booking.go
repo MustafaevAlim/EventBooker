@@ -14,10 +14,10 @@ import (
 
 type BookingService interface {
 	Book(ctx context.Context, b model.BookingInCreate) error
-	Confirm(ctx context.Context, eventID, userID int) error
+	Confirm(ctx context.Context, bookID, eventID, userID int) error
 	GetByUserID(ctx context.Context, req model.BookingGetRequest) ([]model.BookingInResponse, error)
 	GetCountUserBooking(ctx context.Context, userID int) (int, error)
-	CancelBook(ctx context.Context, eventID, userID int) error
+	CancelBook(ctx context.Context, bookID, eventID, userID int) error
 }
 
 type bookingService struct {
@@ -72,7 +72,7 @@ func (bs *bookingService) Book(ctx context.Context, b model.BookingInCreate) err
 	})
 }
 
-func (bs *bookingService) Confirm(ctx context.Context, eventID, userID int) error {
+func (bs *bookingService) Confirm(ctx context.Context, bookID, eventID, userID int) error {
 	return bs.storage.WithTx(ctx, func(s *repository.Storage) error {
 
 		event, err := s.Event.GetByID(ctx, eventID)
@@ -88,7 +88,7 @@ func (bs *bookingService) Confirm(ctx context.Context, eventID, userID int) erro
 			return ErrBookingNotRequired
 		}
 
-		err = bs.storage.Booking.UpdateStatus(ctx, model.StatusBookingConfirmed, eventID, userID)
+		err = bs.storage.Booking.UpdateStatus(ctx, model.StatusBookingConfirmed, bookID, eventID, userID)
 		if err != nil {
 			zlog.Logger.Error().Msgf("service.BookingService.Confirm error: %v", err)
 			return err
@@ -129,6 +129,6 @@ func (bs *bookingService) GetCountUserBooking(ctx context.Context, userID int) (
 	return bs.storage.Booking.GetCountUserBooking(ctx, userID)
 }
 
-func (bs *bookingService) CancelBook(ctx context.Context, eventID, userID int) error {
-	return bs.storage.Booking.UpdateStatus(ctx, model.StatusBookingCanceled, eventID, userID)
+func (bs *bookingService) CancelBook(ctx context.Context, bookID, eventID, userID int) error {
+	return bs.storage.Booking.UpdateStatus(ctx, model.StatusBookingCanceled, bookID, eventID, userID)
 }

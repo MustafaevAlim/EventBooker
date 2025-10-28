@@ -12,7 +12,7 @@ import (
 type BookingRepository interface {
 	Create(ctx context.Context, b model.BookingInCreate, status string) error
 	GetListBooking(ctx context.Context, req model.BookingGetRequest) ([]model.BookingWithEventDetails, error)
-	UpdateStatus(ctx context.Context, status string, eventID, userID int) error
+	UpdateStatus(ctx context.Context, status string, bookID, eventID, userID int) error
 	GetOccupiedPlace(ctx context.Context, eventID int) (int, error)
 	GetExpiredBooking(ctx context.Context) ([]model.BookingGetForTG, error)
 	GetCountUserBooking(ctx context.Context, id int) (int, error)
@@ -107,11 +107,11 @@ func (br *bookingRepository) GetListBooking(ctx context.Context, req model.Booki
 	return b, nil
 }
 
-func (br *bookingRepository) UpdateStatus(ctx context.Context, status string, eventID, userID int) error {
+func (br *bookingRepository) UpdateStatus(ctx context.Context, status string, bookID, eventID, userID int) error {
 	query := `UPDATE booking
 				SET status=$1
-				WHERE user_id=$2 AND event_id=$3`
-	_, err := br.db.ExecContext(ctx, query, status, userID, eventID)
+				WHERE user_id=$2 AND event_id=$3 AND booking_ID=$4`
+	_, err := br.db.ExecContext(ctx, query, status, userID, eventID, bookID)
 	if err != nil {
 		return err
 	}

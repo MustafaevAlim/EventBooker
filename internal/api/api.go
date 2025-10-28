@@ -28,8 +28,8 @@ func SetupRoutes(h *handlers.Handlers, g *ginext.Engine) {
 	api.Use(handlers.AuthMiddleware())
 	{
 		api.POST("/events/:event_id/book", h.Booking.Book)
-		api.POST("/events/:event_id/confirm", h.Booking.Confirm)
-		api.POST("/events/:event_id/cancel", h.Booking.Cancel)
+		api.POST("/events/:event_id/confirm/:book_id", h.Booking.Confirm)
+		api.POST("/events/:event_id/cancel/:book_id", h.Booking.Cancel)
 		api.GET("/books", h.Booking.GetListBooking)
 
 		admin := api.Group("/admin")
