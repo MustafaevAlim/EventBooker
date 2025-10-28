@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventBooker - Админка</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            border: 1px solid #ddd;
+            padding: 30px;
+        }
+
+        .admin-container {
+            display: none;
+        }
+
+        .header {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1, h2 {
+            margin-top: 0;
+        }
+
+        .section {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: 1px solid #ddd;
+            background: #333;
+            color: white;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background: #555;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #666;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #f5f5f5;
+            font-weight: bold;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            background: #ddd;
+            font-size: 12px;
+        }
+
+        .error {
+            background: #fdd;
+            border: 1px solid #faa;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        .success {
+            background: #dfd;
+            border: 1px solid #afa;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .pagination {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .pagination button {
+            margin: 0 5px;
+        }
+
+        .tabs {
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border: 1px solid #ddd;
+            background: #5c5b5b;
+            cursor: pointer;
+        }
+
+        .tab-btn.active {
+            background: #333;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Форма входа администратора -->
+    <div id="loginContainer" class="login-container">
+        <h1>EventBooker</h1>
+        <h2>Вход для администратора</h2>
+        
+        <div id="loginError" class="error"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="loginEmail" required>
+            </div>
+            <div class="form-group">
+                <label>Пароль</label>
+                <input type="password" id="loginPassword" required>
+            </div>
+            <button type="submit">Войти</button>
+        </form>
+    </div>
+
+    <!-- Панель администратора -->
+    <div id="adminContainer" class="admin-container">
+        <div class="header">
+            <h1>EventBooker - Панель администратора</h1>
+            <button onclick="logout()">Выйти</button>
+        </div>
+
+        <div id="errorMessage" class="error"></div>
+        <div id="successMessage" class="success"></div>
+
+        <!-- Табы -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('createEvent')">Создать событие</button>
+            <button class="tab-btn" onclick="switchTab('events')">Все события</button>
+            <button class="tab-btn" onclick="switchTab('users')">Пользователи</button>
+        </div>
+
+        <!-- Форма создания события -->
+        <div id="createEventTab" class="tab-content active">
+            <div class="section">
+                <h2>Создать новое событие</h2>
+                <form id="createEventForm" >
+                    <div class="form-group">
+                        <label>Название события *</label>
+                        <input type="text" id="eventTitle" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Описание</label>
+                        <textarea id="eventDescription"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Дата и время события *</label>
+                        <input type="datetime-local" id="eventDate" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Всего мест *</label>
+                        <input type="number" id="totalPlace" min="1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Период резервирования *</label>
+                        <select id="reservationPeriod" required>
+                            <option value="">Выберите период</option>
+                            <option value="0s">Без периода</option>
+                            <option value="15s">15 сек</option>
+                            <option value="1m">1 минута</option>
+                            <option value="15m">15 минут</option>
+                            <option value="30m">30 минут</option>
+                            <option value="1h">1 час</option>
+                            <option value="2h">2 часа</option>
+                            <option value="3h">3 часа</option>
+                            <option value="6h">6 часов</option>
+                            <option value="12h">12 часов</option>
+                            <option value="24h">24 часа</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Требуется подтверждение бронирования</label>
+                        <input type="checkbox" id="bookingConfirmation">
+                    </div>
+
+                    <button type="submit">Создать событие</button>
+                    <button type="reset" class="btn-secondary">Очистить</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Список событий -->
+        <div id="eventsTab" class="tab-content">
+            <div class="section">
+                <h2>Все события</h2>
+                <div id="eventsLoading" class="loading" style="display: none;">Загрузка...</div>
+                <div id="eventsTableContainer"></div>
+                <div class="pagination">
+                    <button id="eventsPrevBtn" onclick="loadPreviousEventsPage()" disabled>Назад</button>
+                    <span id="eventsPageInfo">Страница 0 из 0</span>
+                    <button id="eventsNextBtn" onclick="loadNextEventsPage()" disabled>Вперёд</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Список пользователей -->
+        <div id="usersTab" class="tab-content">
+            <div class="section">
+                <h2>Пользователи системы</h2>
+                <div id="usersLoading" class="loading" style="display: none;">Загрузка...</div>
+                <div id="usersTableContainer"></div>
+                <div class="pagination">
+                    <button id="usersPrevBtn" onclick="loadPreviousUsersPage()" disabled>Назад</button>
+                    <span id="usersPageInfo">Страница 0 из 0</span>
+                    <button id="usersNextBtn" onclick="loadNextUsersPage()" disabled>Вперёд</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://80.249.151.171/api';
+        const PAGE_SIZE = 5;
+
+        let currentEvents = [];
+        let eventsPage = 0;
+        let eventsTotalPages = 0;
+
+        let currentUsers = [];
+        let usersPage = 0;
+        let usersTotalPages = 0;
+
+
+        function showAdminPanel() {
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('adminContainer').style.display = 'block';
+        }
+
+        function showLoginForm() {
+            document.getElementById('loginContainer').style.display = 'block';
+            document.getElementById('adminContainer').style.display = 'none';
+        }
+
+        function showLoginError(message) {
+            const errorDiv = document.getElementById('loginError');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideLoginError() {
+            document.getElementById('loginError').style.display = 'none';
+        }
+
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            hideLoginError();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const loginResponse = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                if (!loginResponse.ok) {
+                    const data = await loginResponse.json();
+                    showLoginError(data.error || 'Ошибка входа');
+                    return;
+                }
+                
+                const loginData = await loginResponse.json();
+                
+                if (!loginData.token) {
+                    showLoginError('Токен не получен');
+                    return;
+                }
+                
+                const checkResponse = await fetch(`${API_URL}/api/admin/check`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${loginData.token}`
+                    }
+                });
+                
+                if (!checkResponse.ok) {
+                    if (checkResponse.status === 403) {
+                        showLoginError('У вас нет прав администратора');
+                    } else {
+                        showLoginError('Ошибка проверки прав доступа');
+                    }
+                    return;
+                }
+                
+                localStorage.setItem('token', loginData.token);
+                showAdminPanel();
+                
+                document.getElementById('loginForm').reset();
+                
+            } catch (error) {
+                console.error('Ошибка авторизации:', error);
+                showLoginError('Ошибка подключения к серверу');
+            }
+        }
+
+
+        function logout() {
+            localStorage.removeItem('token');
+            
+            currentEvents = [];
+            currentUsers = [];
+            eventsPage = 0;
+            usersPage = 0;
+            eventsTotalPages = 0;
+            usersTotalPages = 0;
+            
+            document.getElementById('eventsTableContainer').innerHTML = '';
+            document.getElementById('usersTableContainer').innerHTML = '';
+            
+            document.getElementById('loginForm').reset();
+            hideLoginError();
+            
+            showLoginForm();
+        }
+
+
+
+        async function apiRequest(endpoint, options = {}) {
+            const token = localStorage.getItem('token');
+            
+            const config = {
+                ...options,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    ...options.headers
+                }
+            };
+
+            const response = await fetch(`${API_URL}${endpoint}`, config);
+
+            if (response.status === 401 || response.status === 403) {
+                localStorage.removeItem('token');
+                showLoginForm();
+                throw new Error('Необходима авторизация');
+            }
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Ошибка запроса');
+            }
+            return data;
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            hideMessages();
+
+            if (tab === 'createEvent') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('createEventTab').classList.add('active');
+            } else if (tab === 'events') {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('eventsTab').classList.add('active');
+                if (currentEvents.length === 0) {
+                    loadInitialEventsPage();
+                }
+            } else if (tab === 'users') {
+                document.querySelectorAll('.tab-btn')[2].classList.add('active');
+                document.getElementById('usersTab').classList.add('active');
+                if (currentUsers.length === 0) {
+                    loadInitialUsersPage();
+                }
+            }
+        }
+
+        async function createEvent(e) {
+            e.preventDefault();
+            hideMessages();
+
+            const eventData = {
+                title: document.getElementById('eventTitle').value,
+                description: document.getElementById('eventDescription').value,
+                event_date: new Date(document.getElementById('eventDate').value).toISOString(),
+                total_place: parseInt(document.getElementById('totalPlace').value),
+                reservation_period: document.getElementById('reservationPeriod').value,
+                booking_confirmation: document.getElementById('bookingConfirmation').checked
+            };
+
+            try {
+                await apiRequest('/api/admin/events', {
+                    method: 'POST',
+                    body: JSON.stringify(eventData)
+                });
+
+                showSuccess('Событие успешно создано!');
+                document.getElementById('createEventForm').reset();
+                
+                if (currentEvents.length > 0) {
+                    loadInitialEventsPage();
+                }
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+
+        async function loadInitialEventsPage() {
+            showEventsLoading(true);
+            
+            try {
+                const futureDate = new Date("0001-01-01T00:00:00Z").toISOString();
+                const response = await apiRequest(`/events?last_created_at=${futureDate}&last_id=-1&mode=next&page_size=${PAGE_SIZE}`);
+                
+                if (!response) return;
+                
+                currentEvents = response.events || [];
+                const totalCount = response.count || 0;
+                eventsPage = 1;
+                eventsTotalPages = Math.ceil(totalCount / PAGE_SIZE);
+                
+                displayEvents(currentEvents);
+                updateEventsButtons();
+            } catch (error) {
+                showError('Ошибка загрузки событий: ' + error.message);
+            } finally {
+                showEventsLoading(false);
+            }
+        }
+
+        async function loadNextEventsPage() {
+            if (currentEvents.length === 0 || eventsPage >= eventsTotalPages) return;
+            
+            showEventsLoading(true);
+            
+            try {
+                const lastEvent = currentEvents[currentEvents.length - 1];
+                const lastCreatedAt = new Date(lastEvent.created_at || lastEvent.event_date).toISOString();
+                const lastID = lastEvent.id;
+                
+                const response = await apiRequest(
+                    `/events?last_created_at=${lastCreatedAt}&last_id=${lastID}&mode=next&page_size=${PAGE_SIZE}`
+                );
+                
+                if (!response) return;
+                
+                const events = response.events || [];
+                if (events.length === 0) {
+                    alert('Это последняя страница');
+                    return;
+                }
+                
+                currentEvents = events;
+                eventsPage++;
+                eventsTotalPages = Math.ceil(response.count / PAGE_SIZE);
+                
+                displayEvents(events);
+                updateEventsButtons();
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                showEventsLoading(false);
+            }
+        }
+
+        async function loadPreviousEventsPage() {
+            if (currentEvents.length === 0 || eventsPage === 1) return;
+            
+            showEventsLoading(true);
+            
+            try {
+                const firstEvent = currentEvents[0];
+                const firstCreatedAt = new Date(firstEvent.created_at || firstEvent.event_date).toISOString();
+                const firstID = firstEvent.id;
+                
+                const response = await apiRequest(
+                    `/events?last_created_at=${firstCreatedAt}&last_id=${firstID}&mode=prev&page_size=${PAGE_SIZE}`
+                );
+                
+                if (!response) return;
+                
+                const events = response.events || [];
+                if (events.length === 0) {
+                    alert('Это первая страница');
+                    return;
+                }
+                
+                currentEvents = events.reverse();
+                eventsPage--;
+                
+                displayEvents(currentEvents);
+                updateEventsButtons();
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                showEventsLoading(false);
+            }
+        }
+
+        function displayEvents(events) {
+            if (!events || events.length === 0) {
+                document.getElementById('eventsTableContainer').innerHTML = '<p>Нет событий</p>';
+                return;
+            }
+
+            const table = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Дата</th>
+                            <th>Мест</th>
+                            <th>Занято</th>
+                            <th>Статус</th>
+                            <th>Резерв</th>
+                            <th>Подтверждение</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${events.map(event => `
+                            <tr>
+                                <td>${event.id}</td>
+                                <td>${event.title}</td>
+                                <td>${new Date(event.event_date).toLocaleString('ru-RU')}</td>
+                                <td>${event.total_place}</td>
+                                <td>${event.occupied_place || 0}</td>
+                                <td><span class="badge">${event.event_status}</span></td>
+                                <td>${event.reservation_period}</td>
+                                <td>${event.booking_confirmation ? 'Да' : 'Нет'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('eventsTableContainer').innerHTML = table;
+        }
+
+        function updateEventsButtons() {
+            document.getElementById('eventsPrevBtn').disabled = eventsPage === 1;
+            document.getElementById('eventsNextBtn').disabled = eventsPage >= eventsTotalPages;
+            document.getElementById('eventsPageInfo').textContent = 
+                `Страница ${eventsPage} из ${eventsTotalPages}`;
+        }
+
+        function showEventsLoading(show) {
+            document.getElementById('eventsLoading').style.display = show ? 'block' : 'none';
+        }
+
+
+        async function loadInitialUsersPage() {
+            showUsersLoading(true);
+            
+            try {
+                const futureDate = new Date("0001-01-01T00:00:00Z").toISOString();
+                const response = await apiRequest(`/api/admin/users?last_created_at=${futureDate}&last_id=-1&mode=next&page_size=${PAGE_SIZE}`);
+                
+                if (!response) return;
+                
+                currentUsers = response.users || [];
+                const totalCount = response.count || 0;
+                usersPage = 1;
+                usersTotalPages = Math.ceil(totalCount / PAGE_SIZE);
+                
+                displayUsers(currentUsers);
+                updateUsersButtons();
+            } catch (error) {
+                showError('Ошибка загрузки пользователей: ' + error.message);
+            } finally {
+                showUsersLoading(false);
+            }
+        }
+
+        async function loadNextUsersPage() {
+            if (currentUsers.length === 0 || usersPage >= usersTotalPages) return;
+            
+            showUsersLoading(true);
+            
+            try {
+                const lastUser = currentUsers[currentUsers.length - 1];
+                const lastCreatedAt = new Date(lastUser.created_at).toISOString();
+                const lastID = lastUser.id;
+                
+                const response = await apiRequest(
+                    `/api/admin/users?last_created_at=${lastCreatedAt}&last_id=${lastID}&mode=next`
+                );
+                
+                if (!response) return;
+                
+                const users = response.users || [];
+                if (users.length === 0) {
+                    alert('Это последняя страница');
+                    return;
+                }
+                
+                currentUsers = users;
+                usersPage++;
+                
+                displayUsers(users);
+                updateUsersButtons();
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                showUsersLoading(false);
+            }
+        }
+
+        async function loadPreviousUsersPage() {
+            if (currentUsers.length === 0 || usersPage === 1) return;
+            
+            showUsersLoading(true);
+            
+            try {
+                const firstUser = currentUsers[0];
+                const firstCreatedAt = new Date(firstUser.created_at).toISOString();
+                const firstID = firstUser.id;
+                
+                const response = await apiRequest(
+                    `/api/admin/users?last_created_at=${firstCreatedAt}&last_id=${firstID}&mode=prev&page_size=${PAGE_SIZE}`
+                );
+                
+                if (!response) return;
+                
+                const users = response.users || [];
+                if (users.length === 0) {
+                    alert('Это первая страница');
+                    return;
+                }
+                
+                currentUsers = users.reverse();
+                usersPage--;
+                
+                displayUsers(currentUsers);
+                updateUsersButtons();
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                showUsersLoading(false);
+            }
+        }
+
+        function displayUsers(users) {
+            if (!users || users.length === 0) {
+                document.getElementById('usersTableContainer').innerHTML = '<p>Нет пользователей</p>';
+                return;
+            }
+
+            const table = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Email</th>
+                            <th>Telegram Chat ID</th>
+                            <th>Дата регистрации</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${users.map(user => `
+                            <tr>
+                                <td>${user.id}</td>
+                                <td>${user.email}</td>
+                                <td>${user.tg_chatid || '-'}</td>
+                                <td>${new Date(user.created_at).toLocaleString('ru-RU')}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('usersTableContainer').innerHTML = table;
+        }
+
+        function updateUsersButtons() {
+            document.getElementById('usersPrevBtn').disabled = usersPage === 1;
+            document.getElementById('usersNextBtn').disabled = usersPage >= usersTotalPages;
+            document.getElementById('usersPageInfo').textContent = 
+                `Страница ${usersPage} из ${usersTotalPages}`;
+        }
+
+        function showUsersLoading(show) {
+            document.getElementById('usersLoading').style.display = show ? 'block' : 'none';
+        }
+
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => errorDiv.style.display = 'none', 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => successDiv.style.display = 'none', 5000);
+        }
+
+        function hideMessages() {
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            const createEventForm = document.getElementById('createEventForm');
+            if (createEventForm) {
+                createEventForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    await createEvent(e);
+                });
+            }
+
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    await handleLogin(e);
+                });
+            }
+
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                showLoginForm();
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/api/admin/check`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    showAdminPanel();
+                } else {
+                    localStorage.removeItem('token');
+                    showLoginForm();
+                }
+                
+            } catch (error) {
+                console.error('Ошибка проверки токена:', error);
+                localStorage.removeItem('token');
+                showLoginForm();
+            }
+        });
+
+
+    </script>
+</body>
+</html>
