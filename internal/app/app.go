@@ -48,7 +48,7 @@ func (a *App) Run(ctx context.Context) error {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		scheduler.Start(ctx, 30*time.Second, msgForTgCh)
+		scheduler.Start(ctx, 1*time.Minute, msgForTgCh)
 		defer close(msgForTgCh)
 
 	}()
